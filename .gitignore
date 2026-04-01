@@ -1,0 +1,94 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Database files 
+prisma/*.generated.ts
+prisma/migrations/
+prisma/dev.db*
+
+
+# PostgreSQL local data (if using Docker volumes)
+postgres-data/
+pgdata/
+
+# Prisma
+prisma/migrations/*.db
+prisma/migrations/*.sqlite
+prisma/*.generated.ts
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+jest-coverage/
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.pid
+*.seed
+
+# PM2 runtime
+.pm2/
+
+# Redis dump (if using Redis locally)
+dump.rdb
+
+# Uploaded files (if any)
+uploads/
+uploads/*
+!uploads/.gitkeep
+
+# API documentation generated
+swagger-output.json
+apidocs/
+
+# Session data
+sessions/
+
+# Environment-specific
+.env.production
+.env.staging
+.env.test
