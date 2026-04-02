@@ -217,4 +217,42 @@ export class TaskController {
         .json({ success: false, error: (error as Error).message });
     }
   }
+
+  async addComment(req: Request, res: Response) {
+    try {
+      const taskId = parseInt(req.params.id as string);
+
+      if (isNaN(taskId)) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid task ID",
+        });
+      }
+
+      const { message } = req.body;
+
+      if (!message || message.trim() === "") {
+        return res.status(400).json({
+          success: false,
+          error: "Message is required",
+        });
+      }
+
+      // Temporary - in a real app, this would come from auth
+      const authorId = 9; // Dr. Sarah Johnson (or any user from your seed)
+
+      const comment = await taskService.addComment(taskId, authorId, message);
+
+      res.status(201).json({
+        success: true,
+        data: comment,
+      });
+    } catch (error) {
+      const status = (error as Error).message === "Task not found" ? 404 : 500;
+      res.status(status).json({
+        success: false,
+        error: (error as Error).message,
+      });
+    }
+  }
 }

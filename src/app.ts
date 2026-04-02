@@ -1,6 +1,7 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import taskRoutes from "./routes/taskRoutes";
+import userRoutes from "./routes/userRoutes";
 import { swaggerSpec } from "./config/swagger";
 import { config } from "./config/index";
 
@@ -56,6 +57,7 @@ app.get(config.apiBasePath, (req, res) => {
 });
 
 app.use(`${config.apiBasePath}/tasks`, taskRoutes);
+app.use(`${config.apiBasePath}/users`, userRoutes);
 
 // 404 handler
 app.use((req, res) => {

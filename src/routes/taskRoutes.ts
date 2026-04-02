@@ -286,7 +286,6 @@ router.patch("/:id/archive", taskController.archiveTask.bind(taskController));
  */
 router.patch("/:id/restore", taskController.restoreTask.bind(taskController));
 
-
 /**
  * @swagger
  * /api/v1/tasks/status/{status}:
@@ -343,4 +342,61 @@ router.get(
   taskController.getTasksByAssignee.bind(taskController),
 );
 
+/**
+ * @swagger
+ * /api/v1/tasks/{id}/comments:
+ *   post:
+ *     summary: Add a comment to a task
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *         description: Task ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - message
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: "Working on this task now"
+ *     responses:
+ *       201:
+ *         description: Comment added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id: { type: integer }
+ *                     taskId: { type: integer }
+ *                     authorId: { type: integer }
+ *                     message: { type: string }
+ *                     createdAt: { type: string, format: date-time }
+ *                     author:
+ *                       type: object
+ *                       properties:
+ *                         id: { type: integer }
+ *                         name: { type: string }
+ *                         email: { type: string }
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Task not found
+ */
+router.post(
+  "/:id/comments",
+  validate(commentSchema),
+  taskController.addComment.bind(taskController),
+);
 export default router;

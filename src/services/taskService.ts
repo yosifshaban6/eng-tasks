@@ -89,6 +89,29 @@ class TaskService {
 
     return taskRepository.restore(id);
   }
+
+  async addComment(taskId: number, authorId: number, message: string) {
+    // Check if task exists
+    const task = await taskRepository.findById(taskId);
+    if (!task) {
+      throw new Error("Task not found");
+    }
+
+    // Add comment
+    const comment = await taskRepository.addComment(taskId, authorId, message);
+
+    // Log activity (optional but good for tracking)
+    await activityLogService.logChange(
+      taskId,
+      authorId,
+      "COMMENT",
+      "comment",
+      null,
+      message,
+    );
+
+    return comment;
+  }
 }
 
 export default new TaskService();

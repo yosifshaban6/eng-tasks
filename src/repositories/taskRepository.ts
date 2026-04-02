@@ -178,21 +178,6 @@ class TaskRepository {
     };
   }
 
-  async addComment(taskId: number, authorId: number, message: string) {
-    return prisma.comment.create({
-      data: {
-        taskId,
-        authorId,
-        message,
-      },
-      include: {
-        author: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-    });
-  }
-
   async getTaskWithDetails(id: number) {
     return prisma.task.findUnique({
       where: { id },
@@ -228,6 +213,43 @@ class TaskRepository {
         email: true,
       },
       orderBy: { name: "asc" },
+    });
+  }
+
+  async addComment(taskId: number, authorId: number, message: string) {
+    return prisma.comment.create({
+      data: {
+        taskId,
+        authorId,
+        message,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getCommentsByTask(taskId: number) {
+    return prisma.comment.findMany({
+      where: { taskId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   }
 }
