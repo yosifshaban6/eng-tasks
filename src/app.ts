@@ -4,6 +4,7 @@ import taskRoutes from "./routes/taskRoutes";
 import userRoutes from "./routes/userRoutes";
 import { swaggerSpec } from "./config/swagger";
 import { config } from "./config/index";
+import cacheRoutes from "./routes/cacheRoutes";
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.get(config.apiBasePath, (req, res) => {
 
 app.use(`${config.apiBasePath}/tasks`, taskRoutes);
 app.use(`${config.apiBasePath}/users`, userRoutes);
+app.use(`${config.apiBasePath}/`, cacheRoutes);
 
 // 404 handler
 app.use((req, res) => {
