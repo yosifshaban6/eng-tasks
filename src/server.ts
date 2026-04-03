@@ -1,19 +1,34 @@
-// src/server.ts
 import dotenv from "dotenv";
-import app from "./app";
-import prisma from "./utils/prisma";
-import { config } from "./config/index";
+import http from "http";
+import { initSocket } from "./sockets/index.js";
+import app from "./app.js";
+import prisma from "./utils/prisma.js";
+import { config } from "./config/index.js";
 
 async function startServer() {
   try {
     await prisma.$connect();
     console.log("✅ PostgreSQL connected successfully via Prisma");
 
-    app.listen(config.port, () => {
-      console.log(`\nExpress server is running!`);
-      console.log(`URL: http://localhost:${config.port}`);
-      console.log(`Health check: http://localhost:${config.port}/health`);
-      console.log(`\nNo routes loaded - just infrastructure running\n`);
+    const server = http.createServer(app);
+
+    // Initialize Socket.io
+    console.log("🔌 Initializing WebSocket server...");
+    initSocket(server);
+
+    server.listen(config.port, () => {
+      console.log(
+        `\n╔═══════════════════════════════════════════════════════╗`,
+      );
+      console.log(`║           Eng Tasks API - Server Started              ║`);
+      console.log(`╚═══════════════════════════════════════════════════════╝`);
+      console.log(`\n🚀 Express: http://localhost:${config.port}`);
+      console.log(`🔌 WebSocket: ws://localhost:${config.port}`);
+      console.log(`📚 API Docs: http://localhost:${config.port}/api-docs`);
+      console.log(`✅ Health: http://localhost:${config.port}/health`);
+      console.log(`📋 Tasks: http://localhost:${config.port}/api/v1/tasks`);
+      console.log(`\n🌍 Environment: ${config.env}`);
+      console.log(`📦 API Version: ${config.apiVersion}\n`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
@@ -25,6 +40,6 @@ startServer();
 
 process.on("SIGINT", async () => {
   await prisma.$disconnect();
-  console.log("\nServer shut down gracefully");
+  console.log("\n👋 Server shut down gracefully");
   process.exit(0);
 });

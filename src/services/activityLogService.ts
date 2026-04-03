@@ -1,4 +1,9 @@
 import prisma from "../utils/prisma";
+import {
+  emitTaskUpdate,
+  emitCommentAdded,
+  emitStatusChanged,
+} from "../sockets/index.js";
 
 class ActivityLogService {
   async logStatusChange(
@@ -9,12 +14,7 @@ class ActivityLogService {
   ) {
     if (oldStatus === newStatus) return;
 
-    console.log("Logging status change:", {
-      taskId,
-      oldStatus,
-      newStatus,
-      userId,
-    });
+    emitStatusChanged(taskId, oldStatus, newStatus, userId);
 
     return prisma.activityLog.create({
       data: {
@@ -35,6 +35,12 @@ class ActivityLogService {
     userId: number,
   ) {
     if (oldPriority === newPriority) return;
+
+    emitTaskUpdate(taskId, "priority-changed", {
+      oldPriority,
+      newPriority,
+      userId,
+    });
 
     return prisma.activityLog.create({
       data: {
@@ -67,6 +73,12 @@ class ActivityLogService {
       }),
     ]);
 
+    emitTaskUpdate(taskId, "assignee-changed", {
+      oldAssignee: oldUser?.name,
+      newAssignee: newUser?.name,
+      userId,
+    });
+
     return prisma.activityLog.create({
       data: {
         taskId,
@@ -84,6 +96,18 @@ class ActivityLogService {
     commentMessage: string,
     userId: number,
   ) {
+    const comment = await prisma.comment.findFirst({
+      where: { taskId, authorId: userId, message: commentMessage },
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    if (comment) {
+      emitCommentAdded(taskId, comment);
+    }
+
     return prisma.activityLog.create({
       data: {
         taskId,
@@ -96,6 +120,8 @@ class ActivityLogService {
   }
 
   async logTaskArchive(taskId: number, userId: number) {
+    emitTaskUpdate(taskId, "task-archived", { userId });
+
     return prisma.activityLog.create({
       data: {
         taskId,
@@ -109,6 +135,8 @@ class ActivityLogService {
   }
 
   async logTaskRestore(taskId: number, userId: number) {
+    emitTaskUpdate(taskId, "task-restored", { userId });
+
     return prisma.activityLog.create({
       data: {
         taskId,
