@@ -4,10 +4,11 @@
   "description": "EngTechnos Backend Technical Assessment",
   "main": "index.js",
   "scripts": {
+    "prebuild": "prisma generate",
     "seed": "tsx prisma/seed.ts",
-    "dev": "NODE_NO_WARNINGS=1 tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
+    "build": "tsc --ignoreDeprecations 6.0",
+    "dev": "tsx src/server.ts",
+    "start": "tsx src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +28,8 @@
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

@@ -3,7 +3,7 @@ import taskRepository, {
   UpdateTaskInput,
 } from "../repositories/taskRepository.js";
 import activityLogService from "./activityLogService.js";
-import prisma from "../utils/prisma";
+import prisma from "../utils/prisma.js";
 
 class TaskService {
   async getAllTasks(filters: any, pagination: any) {

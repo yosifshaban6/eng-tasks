@@ -17,6 +17,13 @@ async function main() {
   await prisma.activityLog?.deleteMany?.();
   console.log("Cleared existing data");
 
+  // Reset sequences
+  await prisma.$executeRaw`ALTER SEQUENCE "User_id_seq" RESTART WITH 1`;
+  await prisma.$executeRaw`ALTER SEQUENCE "Task_id_seq" RESTART WITH 1`;
+  await prisma.$executeRaw`ALTER SEQUENCE "Comment_id_seq" RESTART WITH 1`;
+  await prisma.$executeRaw`ALTER SEQUENCE "ActivityLog_id_seq" RESTART WITH 1`;
+  console.log("Reset sequences");
+
   // Users
   const usersData = [
     { name: "Dr. Sarah Johnson", email: "sarah.johnson@hospital.com" },
@@ -27,18 +34,20 @@ async function main() {
     { name: "Dr. Robert Kim", email: "robert.kim@hospital.com" },
     { name: "Admin Lisa Wang", email: "lisa.wang@hospital.com" },
     { name: "Dr. Maria Garcia", email: "maria.garcia@hospital.com" },
+    { name: "Dr. David Lee", email: "david.lee@hospital.com" },
   ];
   await prisma.user.createMany({ data: usersData });
   console.log(`✓ Created ${usersData.length} users`);
 
   const users = await prisma.user.findMany();
-  const userIds = users.map(u => u.id);
+  const userIds = users.map((u) => u.id);
 
   // Tasks
   const tasksData = [
     {
       title: "ICU Patient Bed Availability Check",
-      description: "Check and update ICU bed availability across all departments",
+      description:
+        "Check and update ICU bed availability across all departments",
       status: TaskStatus.IN_PROGRESS,
       priority: TaskPriority.URGENT,
       category: "Emergency",
@@ -173,7 +182,8 @@ async function main() {
     },
     {
       title: "Vendor Contract Review",
-      description: "Review and renegotiate contracts with medical supply vendors",
+      description:
+        "Review and renegotiate contracts with medical supply vendors",
       status: TaskStatus.BACKLOG,
       priority: TaskPriority.LOW,
       category: "Procurement",
@@ -242,12 +252,36 @@ async function main() {
   // Comments (example)
   const tasks = await prisma.task.findMany();
   const commentsData = [
-    { taskId: tasks[0].id, authorId: userIds[0], message: "ICU currently has 3 beds available. Will update by 2 PM." },
-    { taskId: tasks[0].id, authorId: userIds[1], message: "Emergency department reports 2 beds available." },
-    { taskId: tasks[2].id, authorId: userIds[2], message: "Contacted 3 agencies. Waiting for response." },
-    { taskId: tasks[4].id, authorId: userIds[4], message: "Reviewed 10 of 15 summaries. Will complete by end of day." },
-    { taskId: tasks[8].id, authorId: userIds[0], message: "OR schedule optimized for next week. Reduced gaps by 30%." },
-    { taskId: tasks[16].id, authorId: userIds[0], message: "Scheduled maintenance for Friday. Radiology notified." },
+    {
+      taskId: tasks[0].id,
+      authorId: userIds[0],
+      message: "ICU currently has 3 beds available. Will update by 2 PM.",
+    },
+    {
+      taskId: tasks[0].id,
+      authorId: userIds[1],
+      message: "Emergency department reports 2 beds available.",
+    },
+    {
+      taskId: tasks[2].id,
+      authorId: userIds[2],
+      message: "Contacted 3 agencies. Waiting for response.",
+    },
+    {
+      taskId: tasks[4].id,
+      authorId: userIds[4],
+      message: "Reviewed 10 of 15 summaries. Will complete by end of day.",
+    },
+    {
+      taskId: tasks[8].id,
+      authorId: userIds[0],
+      message: "OR schedule optimized for next week. Reduced gaps by 30%.",
+    },
+    {
+      taskId: tasks[16].id,
+      authorId: userIds[0],
+      message: "Scheduled maintenance for Friday. Radiology notified.",
+    },
   ];
 
   await prisma.comment.createMany({ data: commentsData });

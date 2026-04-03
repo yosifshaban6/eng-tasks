@@ -1,14 +1,14 @@
 import express from "express";
 import expressLayouts from "express-ejs-layouts";
 import swaggerUi from "swagger-ui-express";
-import taskRoutes from "./routes/taskRoutes";
-import userRoutes from "./routes/userRoutes";
-import { swaggerSpec } from "./config/swagger";
-import { config } from "./config/index";
-import cacheRoutes from "./routes/cacheRoutes";
+import taskRoutes from "./routes/taskRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import { swaggerSpec } from "./config/swagger.js";
+import { config } from "./config/index.js";
+import cacheRoutes from "./routes/cacheRoutes.js";
 import { fileURLToPath } from "url";
 import path from "path";
-import viewRoutes from "./routes/viewRoutes";
+import viewRoutes from "./routes/viewRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

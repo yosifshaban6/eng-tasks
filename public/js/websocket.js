@@ -6,7 +6,7 @@ function connectWebSocket() {
     console.log('🔌 Attempting to connect WebSocket...');
     
     try {
-        socket = io('http://localhost:3000', {
+        socket = io('/', {
             transports: ['websocket', 'polling']
         });
         

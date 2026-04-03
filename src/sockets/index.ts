@@ -4,7 +4,12 @@ let io: Server;
 
 export const initSocket = (server: any) => {
   io = new Server(server, {
-    cors: { origin: "*" },
+    cors: {
+      origin: process.env.NODE_ENV === "production" ? false : "*", // In production, same origin only
+      methods: ["GET", "POST"],
+    },
+    pingTimeout: 60000, // 60 seconds
+    pingInterval: 25000, // 25 seconds
   });
 
   io.on("connection", (socket) => {
@@ -52,7 +57,12 @@ export const emitCommentAdded = (taskId: number, comment: any) => {
   });
 };
 
-export const emitStatusChanged = (taskId: number, oldStatus: string, newStatus: string, userId: number) => {
+export const emitStatusChanged = (
+  taskId: number,
+  oldStatus: string,
+  newStatus: string,
+  userId: number,
+) => {
   const io = getIO();
   io.to(`task-${taskId}`).emit("status-changed", {
     taskId,
