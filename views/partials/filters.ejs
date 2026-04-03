@@ -1,0 +1,47 @@
+<div class="filters-bar">
+    <div class="filter-group">
+        <label>Status:</label>
+        <select id="statusFilter">
+            <option value="">All Status</option>
+            <option value="BACKLOG">Backlog</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="BLOCKED">Blocked</option>
+            <option value="DONE">Done</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label>Priority:</label>
+        <select id="priorityFilter">
+            <option value="">All Priorities</option>
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="URGENT">Urgent</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label>Assignee:</label>
+        <select id="assigneeFilter">
+            <option value="">All Assignees</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label>Sort by:</label>
+        <select id="sortBy">
+            <option value="createdAt">Created Date</option>
+            <option value="dueDate">Due Date</option>
+            <option value="priority">Priority</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label>Sort order:</label>
+        <select id="sortOrder">
+            <option value="desc">Newest first</option>
+            <option value="asc">Oldest first</option>
+        </select>
+    </div>
+</div>

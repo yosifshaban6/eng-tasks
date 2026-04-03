@@ -1,0 +1,472 @@
+<div class="task-detail-container">
+    <!-- Left Column - Task Content -->
+    <div class="task-content-column">
+        <div class="task-header-actions">
+            <button onclick="window.location.href='/'">← Back to Dashboard</button>
+            <div class="task-actions">
+                <button class="btn-edit" onclick="toggleEditMode()">✏️ Edit Task</button>
+                <% if (task.archived) { %>
+                    <button class="btn-restore" onclick="restoreTask()">↩️ Restore Task</button>
+                <% } else { %>
+                    <button class="btn-archive" onclick="archiveTask()">📦 Archive Task</button>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- View Mode -->
+        <div id="viewMode">
+            <h1 id="taskTitle"><%= task.title %></h1>
+            
+            <div class="task-badges editable-badges">
+                <div class="editable-field">
+                    <label>Status</label>
+                    <select id="inlineStatus" class="status-select" onchange="updateStatus(this.value)">
+                        <option value="BACKLOG" <%= task.status === 'BACKLOG' ? 'selected' : '' %>>Backlog</option>
+                        <option value="IN_PROGRESS" <%= task.status === 'IN_PROGRESS' ? 'selected' : '' %>>In Progress</option>
+                        <option value="BLOCKED" <%= task.status === 'BLOCKED' ? 'selected' : '' %>>Blocked</option>
+                        <option value="DONE" <%= task.status === 'DONE' ? 'selected' : '' %>>Done</option>
+                    </select>
+                </div>
+
+                <div class="editable-field">
+                    <label>Priority</label>
+                    <select id="inlinePriority" class="priority-select" onchange="updatePriority(this.value)">
+                        <option value="LOW" <%= task.priority === 'LOW' ? 'selected' : '' %>>Low</option>
+                        <option value="MEDIUM" <%= task.priority === 'MEDIUM' ? 'selected' : '' %>>Medium</option>
+                        <option value="HIGH" <%= task.priority === 'HIGH' ? 'selected' : '' %>>High</option>
+                        <option value="URGENT" <%= task.priority === 'URGENT' ? 'selected' : '' %>>Urgent</option>
+                    </select>
+                </div>
+
+                <div class="editable-field">
+                    <label>Category</label>
+                    <span id="viewCategory" class="category-badge"><%= task.category %></span>
+                </div>
+            </div>
+
+            <div class="task-metadata">
+                <div class="meta-item editable-field">
+                    <label>Assignee</label>
+                    <select id="inlineAssignee" onchange="updateAssignee(this.value)">
+                        <% users.forEach(function(user) { %>
+                            <option value="<%= user.id %>" <%= task.assigneeId === user.id ? 'selected' : '' %>>
+                                <%= user.name %> (<%= user.email %>)
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+                
+                <div class="meta-item">
+                    <label>Due Date:</label>
+                    <span id="viewDueDate"><%= new Date(task.dueDate).toLocaleString() %></span>
+                </div>
+                
+                <div class="meta-item">
+                    <label>Created:</label>
+                    <span><%= new Date(task.createdAt).toLocaleString() %></span>
+                </div>
+                
+                <div class="meta-item">
+                    <label>Last Updated:</label>
+                    <span id="lastUpdated"><%= new Date(task.updatedAt).toLocaleString() %></span>
+                </div>
+                
+                <% if (task.archived) { %>
+                    <div class="meta-item archived-warning">
+                        <label>Status:</label>
+                        <span style="color: #ffc107; font-weight: bold;">📦 This task is archived</span>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="task-description-full">
+                <label>Description</label>
+                <p id="viewDescription"><%= task.description %></p>
+            </div>
+        </div>
+
+        <!-- Edit Mode (Hidden by default) -->
+        <div id="editMode" style="display: none;">
+            <h1>Edit Task</h1>
+            
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="editTitle" value="<%= task.title %>">
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" id="editCategory" value="<%= task.category %>">
+            </div>
+
+            <div class="form-group">
+                <label>Due Date</label>
+                <input type="datetime-local" id="editDueDate" value="<%= new Date(task.dueDate).toISOString().slice(0, 16) %>">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="editDescription" rows="8"><%= task.description %></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn-save" onclick="saveTask()">💾 Save Changes</button>
+                <button class="btn-cancel" onclick="toggleEditMode()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="comments-section">
+            <h3>Comments (<span id="commentCount"><%= task.comments ? task.comments.length : 0 %></span>)</h3>
+            
+            <div class="add-comment">
+                <textarea id="newComment" placeholder="Add a comment..." rows="3"></textarea>
+                <button onclick="addComment()">Post Comment</button>
+            </div>
+
+            <div id="commentsList">
+                <% if (task.comments && task.comments.length > 0) { %>
+                    <% task.comments.forEach(function(comment) { %>
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <strong><%= comment.author ? comment.author.name : 'Unknown' %></strong>
+                                <span class="comment-time"><%= new Date(comment.createdAt).toLocaleString() %></span>
+                            </div>
+                            <div class="comment-body"><%= comment.message %></div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p class="no-comments">No comments yet. Be the first to comment!</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Activity Logs -->
+    <div class="activity-column">
+        <h3>Activity Timeline</h3>
+        <div class="activity-timeline" id="activityTimeline">
+            <% if (task.activity && task.activity.length > 0) { %>
+                <% task.activity.forEach(function(log) { %>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <% if (log.action === 'CREATE') { %>📝<% } %>
+                            <% if (log.action === 'UPDATE') { %>✏️<% } %>
+                            <% if (log.action === 'COMMENT') { %>💬<% } %>
+                            <% if (log.action === 'ARCHIVE') { %>📦<% } %>
+                            <% if (log.action === 'RESTORE') { %>🔄<% } %>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-action">
+                                <strong><%= log.action %></strong>
+                                <% if (log.field) { %> - <%= log.field %><% } %>
+                            </div>
+                            <% if (log.oldValue || log.newValue) { %>
+                                <div class="activity-change">
+                                    <% if (log.oldValue) { %>
+                                        <span class="old-value"><%= log.oldValue %></span> → 
+                                    <% } %>
+                                    <span class="new-value"><%= log.newValue %></span>
+                                </div>
+                            <% } %>
+                            <div class="activity-time"><%= new Date(log.createdAt).toLocaleString() %></div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p class="no-activity">No activity recorded yet</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+    const taskId = <%= task.id %>;
+    const DEFAULT_USER_ID = 9;
+    let isEditMode = false;
+
+    function toggleEditMode() {
+        isEditMode = !isEditMode;
+        document.getElementById('viewMode').style.display = isEditMode ? 'none' : 'block';
+        document.getElementById('editMode').style.display = isEditMode ? 'block' : 'none';
+    }
+
+    async function updateStatus(newStatus) {
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus, userId: DEFAULT_USER_ID })
+            });
+            
+            if (response.ok) {
+                updateLastUpdated();
+                refreshActivityLog();
+                showNotification('Status updated successfully', 'success');
+            } else {
+                const error = await response.json();
+                showNotification(error.error, 'error');
+                document.getElementById('inlineStatus').value = '<%= task.status %>';
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            showNotification('Failed to update status', 'error');
+        }
+    }
+
+    async function updatePriority(newPriority) {
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ priority: newPriority, userId: DEFAULT_USER_ID })
+            });
+            
+            if (response.ok) {
+                updateLastUpdated();
+                refreshActivityLog();
+                showNotification('Priority updated successfully', 'success');
+            } else {
+                const error = await response.json();
+                showNotification(error.error, 'error');
+                document.getElementById('inlinePriority').value = '<%= task.priority %>';
+            }
+        } catch (error) {
+            console.error('Error updating priority:', error);
+            showNotification('Failed to update priority', 'error');
+        }
+    }
+
+    async function updateAssignee(newAssigneeId) {
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assigneeId: parseInt(newAssigneeId), userId: DEFAULT_USER_ID })
+            });
+            
+            if (response.ok) {
+                updateLastUpdated();
+                refreshActivityLog();
+                showNotification('Assignee updated successfully', 'success');
+            } else {
+                const error = await response.json();
+                showNotification(error.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error updating assignee:', error);
+            showNotification('Failed to update assignee', 'error');
+        }
+    }
+
+    async function saveTask() {
+        const updateData = {
+            title: document.getElementById('editTitle').value,
+            category: document.getElementById('editCategory').value,
+            dueDate: new Date(document.getElementById('editDueDate').value).toISOString(),
+            description: document.getElementById('editDescription').value,
+            userId: DEFAULT_USER_ID
+        };
+
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                showNotification(error.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error saving task:', error);
+            showNotification('Failed to save task', 'error');
+        }
+    }
+
+    async function archiveTask() {
+        if (!confirm('Archive this task?')) return;
+        
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}/archive`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: DEFAULT_USER_ID })
+            });
+            
+            if (response.ok) {
+                showNotification('Task archived successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } else {
+                const error = await response.json();
+                showNotification(error.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error archiving task:', error);
+            showNotification('Failed to archive task', 'error');
+        }
+    }
+
+    async function restoreTask() {
+        if (!confirm('Restore this task? It will reappear in the main task list.')) return;
+        
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}/restore`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: DEFAULT_USER_ID })
+            });
+            
+            if (response.ok) {
+                showNotification('Task restored successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } else {
+                const error = await response.json();
+                showNotification(error.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error restoring task:', error);
+            showNotification('Failed to restore task', 'error');
+        }
+    }
+
+    async function addComment() {
+        const message = document.getElementById('newComment').value.trim();
+        if (!message) {
+            showNotification('Please enter a comment', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, userId: DEFAULT_USER_ID })
+            });
+            
+            if (response.ok) {
+                document.getElementById('newComment').value = '';
+                refreshComments();
+                refreshActivityLog();
+                updateLastUpdated();
+                showNotification('Comment added successfully', 'success');
+            } else {
+                const error = await response.json();
+                showNotification(error.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            showNotification('Failed to add comment', 'error');
+        }
+    }
+
+    async function refreshActivityLog() {
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}`);
+            const result = await response.json();
+            
+            if (result.success && result.data.activity) {
+                const timeline = document.getElementById('activityTimeline');
+                timeline.innerHTML = result.data.activity.map(function(log) {
+                    let icon = '';
+                    if (log.action === 'CREATE') icon = '📝';
+                    else if (log.action === 'UPDATE') icon = '✏️';
+                    else if (log.action === 'COMMENT') icon = '💬';
+                    else if (log.action === 'ARCHIVE') icon = '📦';
+                    else if (log.action === 'RESTORE') icon = '🔄';
+                    
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-icon">${icon}</div>
+                            <div class="activity-content">
+                                <div class="activity-action">
+                                    <strong>${log.action}</strong>
+                                    ${log.field ? ` - ${log.field}` : ''}
+                                </div>
+                                ${log.oldValue || log.newValue ? `
+                                    <div class="activity-change">
+                                        ${log.oldValue ? `<span class="old-value">${escapeHtml(log.oldValue)}</span> → ` : ''}
+                                        <span class="new-value">${escapeHtml(log.newValue)}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="activity-time">${new Date(log.createdAt).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (error) {
+            console.error('Error refreshing activity log:', error);
+        }
+    }
+
+    async function refreshComments() {
+        try {
+            const response = await fetch(`/api/v1/tasks/${taskId}`);
+            const result = await response.json();
+            
+            if (result.success && result.data.comments) {
+                const commentsList = document.getElementById('commentsList');
+                const commentCount = document.getElementById('commentCount');
+                
+                commentCount.textContent = result.data.comments.length;
+                
+                commentsList.innerHTML = result.data.comments.map(function(comment) {
+                    return `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <strong>${escapeHtml(comment.author ? comment.author.name : 'Unknown')}</strong>
+                                <span class="comment-time">${new Date(comment.createdAt).toLocaleString()}</span>
+                            </div>
+                            <div class="comment-body">${escapeHtml(comment.message)}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (error) {
+            console.error('Error refreshing comments:', error);
+        }
+    }
+
+    function updateLastUpdated() {
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+        document.getElementById('viewDueDate').textContent = new Date(document.getElementById('editDueDate')?.value || new Date()).toLocaleString();
+        document.getElementById('viewCategory').textContent = document.getElementById('editCategory')?.value || '';
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            background-color: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+</script>

@@ -1,0 +1,34 @@
+<div class="task-card" onclick="window.location.href = '/task/<%= task.id %>'">
+  <div class="task-header">
+    <div class="task-title"><%= task.title %></div>
+    <span class="priority-badge priority-<%= task.priority %>"
+      ><%= task.priority %></span
+    >
+  </div>
+  <div class="task-description">
+    <%= task.description.substring(0, 100) %><%= task.description.length > 100 ?
+    '...' : '' %>
+  </div>
+  <div class="task-meta">
+    <span class="status-badge status-<%= task.status %>">
+      <%= task.status.replace('_', ' ') %>
+    </span>
+    <span class="category-badge"><%= task.category %></span>
+  </div>
+  <div class="task-footer">
+    <div class="assignee-info">
+      <div class="assignee-avatar">
+        <%= (task.assignee?.name || 'U').split(' ').map(n =>
+        n[0]).join('').toUpperCase().substring(0, 2) %>
+      </div>
+      <div class="assignee-name">
+        <%= task.assignee?.name || 'Unassigned' %>
+      </div>
+    </div>
+    <div
+      class="due-date <%= new Date(task.dueDate) < new Date() ? 'overdue' : '' %>"
+    >
+      📅 <%= new Date(task.dueDate).toLocaleDateString() %>
+    </div>
+  </div>
+</div>

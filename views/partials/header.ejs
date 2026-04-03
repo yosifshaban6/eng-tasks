@@ -1,0 +1,23 @@
+<header class="header">
+  <div class="header-content">
+    <div class="logo-section">
+      <h1>EngTasks</h1>
+    </div>
+    <nav class="nav-links">
+      <a
+        href="/"
+        class="nav-link <%= currentPage === 'tasks' ? 'active' : '' %>"
+        >Active Tasks</a
+      >
+      <a
+        href="/archived"
+        class="nav-link <%= currentPage === 'archived' ? 'active' : '' %>"
+        >Archived</a
+      >
+    </nav>
+  </div>
+  <div class="connection-status" id="connectionStatus">
+    <span class="status-dot disconnected"></span>
+    <span>Disconnected</span>
+  </div>
+</header>

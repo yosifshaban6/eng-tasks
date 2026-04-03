@@ -46,6 +46,7 @@ export const taskQuerySchema = z.object({
     search: z.string().optional(),
     sortBy: z.enum(["createdAt", "dueDate", "priority"]).default("createdAt"),
     sortOrder: z.enum(["asc", "desc"]).default("desc"),
+    archived: z.enum(["true", "false"]).optional().default("false"), // Add this line
   }),
 });
 

@@ -136,7 +136,14 @@ class TaskRepository {
     const { page, limit, sortBy, sortOrder } = pagination;
     const skip = (page - 1) * limit;
 
-    const where: any = { archived: false };
+    const where: any = {};
+
+    // Handle archived filter - if specified, use it, otherwise default to false (active tasks only)
+    if (filters.archived !== undefined) {
+      where.archived = filters.archived;
+    } else {
+      where.archived = false; // Default: show only active tasks
+    }
 
     if (filters.status) where.status = filters.status;
     if (filters.priority) where.priority = filters.priority;
