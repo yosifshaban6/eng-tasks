@@ -27,6 +27,17 @@ A production-ready REST API and web application for managing engineering tasks w
 - **Archive/Restore** functionality
 - **WebSocket live updates** for collaborative work
 
+
+## Production API
+
+The Eng Tasks API is deployed and available for production use at:
+
+### Base URL
+
+https://eng-tasks-api.yourdomain.com/api/v1
+
+
+
 ## API Endpoints
 
 | Method | Endpoint                     | Description                               |
