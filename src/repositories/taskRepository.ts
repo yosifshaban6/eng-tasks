@@ -101,9 +101,11 @@ class TaskRepository {
   }
 
   async update(id: number, data: UpdateTaskInput) {
+    const { userId, ...taskData } = data as any;
+
     return prisma.task.update({
       where: { id },
-      data,
+      data: taskData,
       include: {
         assignee: true,
       },
@@ -194,12 +196,8 @@ class TaskRepository {
           orderBy: { createdAt: "desc" },
         },
         activity: {
-          include: {
-            user: {
-              select: { id: true, name: true, email: true },
-            },
-          },
           orderBy: { createdAt: "desc" },
+          take: 50,
         },
       },
     });

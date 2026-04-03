@@ -138,14 +138,20 @@ export class TaskController {
       const id = parseInt(req.params.id as string);
 
       if (isNaN(id)) {
-        return res.status(400).json({
-          success: false,
-          error: "Invalid task ID",
-        });
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid task ID" });
       }
 
-      const updateData = req.body;
-      const updatedTask = await taskService.updateTask(id, updateData);
+      const { userId, ...updateData } = req.body;
+
+      if (!userId) {
+        return res
+          .status(400)
+          .json({ success: false, error: "userId is required" });
+      }
+
+      const updatedTask = await taskService.updateTask(id, updateData, userId);
       res.json({ success: true, data: updatedTask });
     } catch (error) {
       const status = (error as Error).message === "Task not found" ? 404 : 400;
@@ -179,6 +185,7 @@ export class TaskController {
   async archiveTask(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id as string);
+      const { userId } = req.body;
 
       if (isNaN(id)) {
         return res.status(400).json({
@@ -187,7 +194,13 @@ export class TaskController {
         });
       }
 
-      const archivedTask = await taskService.archiveTask(id);
+      if (!userId) {
+        return res
+          .status(400)
+          .json({ success: false, error: "userId is required" });
+      }
+
+      const archivedTask = await taskService.archiveTask(id, userId);
       res.json({ success: true, data: archivedTask, message: "Task archived" });
     } catch (error) {
       const status = (error as Error).message === "Task not found" ? 404 : 500;
@@ -200,6 +213,7 @@ export class TaskController {
   async restoreTask(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id as string);
+      const { userId } = req.body;
 
       if (isNaN(id)) {
         return res.status(400).json({
@@ -208,7 +222,13 @@ export class TaskController {
         });
       }
 
-      const restoredTask = await taskService.restoreTask(id);
+      if (!userId) {
+        return res
+          .status(400)
+          .json({ success: false, error: "userId is required" });
+      }
+
+      const restoredTask = await taskService.restoreTask(id, userId);
       res.json({ success: true, data: restoredTask, message: "Task restored" });
     } catch (error) {
       const status = (error as Error).message === "Task not found" ? 404 : 500;
@@ -221,38 +241,33 @@ export class TaskController {
   async addComment(req: Request, res: Response) {
     try {
       const taskId = parseInt(req.params.id as string);
+      const { message, userId } = req.body;
 
       if (isNaN(taskId)) {
-        return res.status(400).json({
-          success: false,
-          error: "Invalid task ID",
-        });
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid task ID" });
       }
 
-      const { message } = req.body;
-
-      if (!message || message.trim() === "") {
-        return res.status(400).json({
-          success: false,
-          error: "Message is required",
-        });
+      if (!message) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Message is required" });
       }
 
-      // Temporary - in a real app, this would come from auth
-      const authorId = 9; // Dr. Sarah Johnson (or any user from your seed)
+      if (!userId) {
+        return res
+          .status(400)
+          .json({ success: false, error: "userId is required" });
+      }
 
-      const comment = await taskService.addComment(taskId, authorId, message);
-
-      res.status(201).json({
-        success: true,
-        data: comment,
-      });
+      const comment = await taskService.addComment(taskId, message, userId);
+      res.status(201).json({ success: true, data: comment });
     } catch (error) {
       const status = (error as Error).message === "Task not found" ? 404 : 500;
-      res.status(status).json({
-        success: false,
-        error: (error as Error).message,
-      });
+      res
+        .status(status)
+        .json({ success: false, error: (error as Error).message });
     }
   }
 }
