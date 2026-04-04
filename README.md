@@ -34,7 +34,7 @@ The Eng Tasks API is deployed and available for production use at:
 
 ### Base URL
 
-https://eng-tasks-api.yourdomain.com/api/v1
+https://eng-tasks-production.up.railway.app/api/v1
 
 
 
